@@ -1,0 +1,725 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>IS Tools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700;800&display=swap">
+<style>
+/* Layout: dark-blue sidebar + light workspace. Blue (#1d5cff family) on white; Manrope headings, Inter text. */
+:root{
+  --bg:#f3f7ff; --surface:#ffffff; --surface2:#eaf1ff; --fg:#0e1b3d; --muted:#5a6b8f; --line:#d8e2f5;
+  --accent:#1d5cff; --accent-fg:#ffffff; --accent-soft:#e3ebff;
+  --good:#0b8a58; --good-soft:#dcf5e9; --warn:#a86a07; --warn-soft:#fdf1d9; --bad:#c92a42; --bad-soft:#fde4e8;
+  --side:#0f2f78; --side2:#173d93; --side-fg:#e8efff; --side-muted:#9db4ea;
+  --shadow:0 1px 2px rgba(15,47,120,.06),0 8px 24px rgba(15,47,120,.07);
+  --head:'Manrope','Segoe UI',system-ui,sans-serif; --body:'Inter','Segoe UI',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0a1124; --surface:#121c38; --surface2:#19264b; --fg:#e8eefc; --muted:#98a8cc; --line:#26355f;
+  --accent:#6a95ff; --accent-fg:#06112e; --accent-soft:#1b2c5c;
+  --good:#4fd39b; --good-soft:#12382c; --warn:#f0b955; --warn-soft:#3a2d10; --bad:#ff7a8d; --bad-soft:#3d1823;
+  --side:#0b1838; --side2:#142a5c; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0a1124; --surface:#121c38; --surface2:#19264b; --fg:#e8eefc; --muted:#98a8cc; --line:#26355f;
+  --accent:#6a95ff; --accent-fg:#06112e; --accent-soft:#1b2c5c;
+  --good:#4fd39b; --good-soft:#12382c; --warn:#f0b955; --warn-soft:#3a2d10; --bad:#ff7a8d; --bad-soft:#3d1823;
+  --side:#0b1838; --side2:#142a5c; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3);color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--fg);font:15px/1.6 var(--body);-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--side)}
+h1,h2,h3,h4{font-family:var(--head);line-height:1.2;margin:0;text-wrap:balance}
+p{margin:0}
+code{font:.88em ui-monospace,Menlo,Consolas,monospace;background:var(--accent-soft);color:var(--accent);padding:.1em .4em;border-radius:5px}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.app{display:grid;grid-template-columns:288px minmax(0,1fr);min-height:100vh}
+.side{background:linear-gradient(180deg,var(--side),var(--side2));color:var(--side-fg);position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:22px 16px;display:flex;flex-direction:column;gap:18px;z-index:50}
+.brand{display:flex;gap:12px;align-items:center;padding:4px 8px}
+.logo{width:42px;height:42px;border-radius:12px;background:#fff;color:#1d5cff;display:grid;place-items:center;font:800 15px var(--head);letter-spacing:-.5px;flex:none}
+.brand b{display:block;font:800 18px var(--head);color:#fff}
+.brand span{font-size:12px;color:var(--side-muted);line-height:1.3;display:block}
+.nav{display:flex;flex-direction:column;gap:4px}
+.nav a,.nav button{display:flex;gap:12px;align-items:center;color:var(--side-fg);text-decoration:none;padding:10px 12px;border-radius:10px;font-weight:500;background:none;border:0;cursor:pointer;text-align:left;width:100%;transition:background .15s}
+.nav a:hover,.nav button:hover{background:rgba(255,255,255,.1)}
+.nav a.on{background:#fff;color:#0f2f78}
+.nav svg{width:19px;height:19px;flex:none}
+.side h5{margin:0 8px 8px;font:600 11px var(--body);letter-spacing:.09em;text-transform:uppercase;color:var(--side-muted)}
+.mini{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:0 4px}
+.mini a{aspect-ratio:1;border-radius:9px;display:grid;place-items:center;font:700 13px var(--head);text-decoration:none;color:var(--side-fg);background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);transition:transform .15s}
+.mini a:hover{transform:translateY(-2px)}
+.mini a.s-done{background:#1fb77a;border-color:#1fb77a;color:#04271a}
+.mini a.s-review{background:#f2b84b;border-color:#f2b84b;color:#3a2600}
+.mini a.s-progress{background:rgba(106,149,255,.35);border-color:#6a95ff}
+.mini a.cur{outline:2px solid #fff;outline-offset:1px}
+.who{margin-top:auto;padding:12px;border-radius:12px;background:rgba(255,255,255,.09);display:flex;flex-direction:column;gap:10px}
+.who small{color:var(--side-muted);display:block}
+.who b{display:block;color:#fff}
+.btn-side{background:#fff;color:#0f2f78;border:0;border-radius:10px;padding:9px 12px;font-weight:600;cursor:pointer}
+.btn-ghost-side{background:transparent;color:var(--side-fg);border:1px solid rgba(255,255,255,.28);border-radius:10px;padding:8px 12px;cursor:pointer}
+
+.top{display:none}
+.main{padding-block:32px 64px;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px));min-width:0}
+.wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:24px;animation:rise .35s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px;box-shadow:var(--shadow);min-width:0}
+.card h2{font-size:20px;margin-bottom:12px}
+.card h3{font-size:16px;margin-bottom:8px}
+.muted{color:var(--muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:var(--accent-fg);border:0;border-radius:11px;padding:11px 20px;font-weight:600;cursor:pointer;text-decoration:none;transition:transform .15s,filter .15s}
+.btn:hover{transform:translateY(-1px);filter:brightness(1.08)}
+.btn.alt{background:var(--accent-soft);color:var(--accent)}
+.btn.line{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.btn.good{background:var(--good);color:#fff}
+.btn.bad{background:var(--bad-soft);color:var(--bad)}
+.btn.sm{padding:7px 13px;font-size:13px;border-radius:9px}
+.btn[disabled]{opacity:.5;cursor:not-allowed;transform:none}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;background:var(--surface2);color:var(--muted);white-space:nowrap}
+.chip.good{background:var(--good-soft);color:var(--good)}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.chip.bad{background:var(--bad-soft);color:var(--bad)}
+.chip.blue{background:var(--accent-soft);color:var(--accent)}
+
+.hero{background:linear-gradient(135deg,#1d5cff,#0f2f78);color:#fff;border-radius:22px;padding:40px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:32px;align-items:center;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-80px;top:-80px;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,.08)}
+.hero>*{position:relative;z-index:1}
+.hero .tag{display:inline-block;background:rgba(255,255,255,.16);padding:4px 12px;border-radius:99px;font-size:12px;font-weight:600;letter-spacing:.04em;margin-bottom:14px}
+.hero h1{font-size:clamp(26px,4vw,40px);font-weight:800;margin-bottom:14px}
+.hero p{color:#dbe6ff;max-width:56ch}
+.hero .btn{background:#fff;color:#0f2f78;margin-top:22px}
+.ring{position:relative;width:150px;height:150px;flex:none}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .bgc{stroke:rgba(255,255,255,.2)}
+.ring .fg{stroke:#fff;transition:stroke-dashoffset .8s ease}
+.ring .lab{position:absolute;inset:0;display:grid;place-content:center;text-align:center;font:800 30px var(--head)}
+.ring .lab small{font:500 12px var(--body);opacity:.8;display:block}
+.ring.light .bgc{stroke:var(--accent-soft)}
+.ring.light .fg{stroke:var(--accent)}
+.ring.light .lab{color:var(--fg)}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow)}
+.stat b{display:block;font:800 30px var(--head);color:var(--accent);font-variant-numeric:tabular-nums}
+.stat span{color:var(--muted);font-size:13px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px}
+.list{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
+.list li::marker{color:var(--accent)}
+
+.head-row{display:flex;gap:16px;justify-content:space-between;align-items:flex-end;flex-wrap:wrap}
+.head-row h1{font-size:28px}
+.filters{display:flex;gap:8px;flex-wrap:wrap}
+.filters button{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:6px 14px;cursor:pointer;font-weight:500;color:var(--muted)}
+.filters button.on{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px}
+.lc{display:flex;flex-direction:column;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;text-decoration:none;color:inherit;box-shadow:var(--shadow);transition:transform .2s,border-color .2s;min-width:0}
+.lc:hover{transform:translateY(-4px);border-color:var(--accent)}
+.lc .num{width:44px;height:44px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:800 18px var(--head)}
+.lc.s-done .num{background:var(--good-soft);color:var(--good)}
+.lc h3{font-size:16px;line-height:1.35}
+.lc .row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:auto}
+.bar{height:7px;border-radius:99px;background:var(--surface2);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .6s ease}
+.lc.s-done .bar i{background:var(--good)}
+
+.lab-head{display:flex;gap:18px;align-items:flex-start}
+.lab-head .num{width:58px;height:58px;border-radius:16px;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center;font:800 26px var(--head);flex:none}
+.lab-head h1{font-size:clamp(22px,3vw,28px)}
+.jump{display:flex;gap:8px;flex-wrap:wrap}
+.jump button{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:5px 12px;font-size:13px;cursor:pointer;color:var(--muted)}
+.jump button:hover{color:var(--accent);border-color:var(--accent)}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;counter-reset:s}
+.steps li label{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);border-radius:12px;cursor:pointer;transition:background .15s}
+.steps li label:hover{background:var(--surface2)}
+.steps li.done label{background:var(--good-soft);border-color:transparent}
+.steps li.done span{text-decoration:line-through;text-decoration-color:var(--good);opacity:.8}
+.steps input{margin-top:4px;width:18px;height:18px;accent-color:var(--accent);flex:none}
+details{border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+details+details{margin-top:8px}
+summary{cursor:pointer;font-weight:500}
+.q{border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.q+.q{margin-top:12px}
+.opt{display:flex;gap:10px;align-items:center;padding:9px 12px;border-radius:10px;border:1px solid var(--line);cursor:pointer}
+.opt:hover{background:var(--surface2)}
+.opt input{accent-color:var(--accent)}
+.opt.ok{background:var(--good-soft);border-color:var(--good)}
+.opt.no{background:var(--bad-soft);border-color:var(--bad)}
+.result{display:flex;gap:16px;align-items:center;padding:16px;border-radius:12px;background:var(--surface2);flex-wrap:wrap}
+.result b{font:800 28px var(--head)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-weight:500;font-size:13px}
+input[type=text],input[type=email],input[type=password],input[type=number],input[type=url],select,textarea{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+textarea{min-height:90px;resize:vertical}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:18px;text-align:center;color:var(--muted);cursor:pointer;display:block;transition:border-color .15s,background .15s}
+.drop:hover{border-color:var(--accent);background:var(--accent-soft)}
+.drop input{display:none}
+.form{display:flex;flex-direction:column;gap:14px}
+.notice{padding:12px 14px;border-radius:10px;background:var(--accent-soft);color:var(--fg);font-size:13px}
+.fb{padding:14px;border-radius:12px;background:var(--good-soft)}
+.fb.ret{background:var(--warn-soft)}
+
+.auth{max-width:440px;margin:6vh auto 0;display:flex;flex-direction:column;gap:18px}
+.tabs{display:flex;background:var(--surface2);border-radius:12px;padding:4px;gap:4px}
+.tabs button{flex:1;border:0;background:none;padding:9px;border-radius:9px;font-weight:600;cursor:pointer;color:var(--muted)}
+.tabs button.on{background:var(--surface);color:var(--accent);box-shadow:var(--shadow)}
+.err{color:var(--bad);font-size:13px;min-height:1em}
+
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+.sq{display:flex;gap:4px;flex-wrap:wrap}
+.sq i{width:20px;height:20px;border-radius:6px;background:var(--surface2);font:700 10px/20px var(--head);text-align:center;font-style:normal;color:var(--muted)}
+.sq i.s-done{background:var(--good);color:#fff}
+.sq i.s-review{background:#f2b84b;color:#3a2600}
+.sq i.s-progress{background:var(--accent-soft);color:var(--accent)}
+.subs{display:flex;flex-direction:column;gap:16px}
+.sub{border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.two{display:grid;grid-template-columns:120px 1fr;gap:12px}
+.cert{width:100%;height:auto;border-radius:12px;border:1px solid var(--line);display:block;background:#fff}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--fg);color:var(--bg);padding:11px 18px;border-radius:12px;opacity:0;pointer-events:none;transition:.25s;z-index:100;max-width:90vw;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.scrim{display:none}
+
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .top{display:flex;align-items:center;gap:12px;position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:var(--side);color:#fff;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px))}
+  .top button{background:rgba(255,255,255,.14);border:0;color:#fff;border-radius:10px;width:40px;height:40px;cursor:pointer;display:grid;place-items:center}
+  .top b{font:800 17px var(--head)}
+  .side{position:fixed;left:0;top:0;bottom:0;width:min(310px,86vw);transform:translateX(-102%);transition:transform .25s;box-shadow:0 0 40px rgba(0,0,0,.35);padding-top:calc(22px + env(safe-area-inset-top,0px))}
+  .side.open{transform:none}
+  .scrim.on{display:block;position:fixed;inset:0;background:rgba(5,12,35,.5);z-index:45}
+  .main{padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .hero{grid-template-columns:1fr;padding:26px}
+  .ring{width:120px;height:120px}
+  .card{padding:18px}
+  .two{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="app">
+  <aside class="side" id="side"></aside>
+  <div class="scrim" id="scrim" data-a="closeMenu"></div>
+  <div>
+    <div class="top"><button data-a="menu" aria-label="Открыть меню"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><b>IS Tools</b></div>
+    <main class="main"><div id="view"></div></main>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ===================== Содержимое курса ===================== */
+const L=(title,goal,theory,tools,steps,tasks,adv,qs,test)=>({title,goal,theory,tools,steps,tasks,adv,qs,test});
+const LABS=[
+L('Изучение инструментальных средств информационных систем',
+ 'Познакомиться с классами инструментальных средств, которые применяются на этапах жизненного цикла информационной системы, и подготовить рабочую среду.',
+ ['Инструментальные средства информационных систем — это программы, которые помогают анализировать требования, проектировать, программировать, тестировать и сопровождать систему. Их делят на средства моделирования (draw.io, Visual Paradigm), средства работы с данными (MySQL Workbench, MS Access), среды разработки (VS Code, IntelliJ IDEA), средства тестирования (Postman, Selenium) и системы контроля версий (Git).','Жизненный цикл ИС включает анализ, проектирование, реализацию, тестирование, внедрение и сопровождение. Инструмент выбирают по назначению, стоимости, поддержке командной работы, форматам обмена данными и качеству документации.'],
+ ['Visual Studio Code','Git и GitHub','draw.io','MySQL Workbench','Postman'],
+ ['Установите VS Code и расширения Live Server и GitLens.','Установите Git, выполните `git --version` и задайте имя: `git config --global user.name "Ваше имя"`.','Создайте на GitHub репозиторий `is-tools-lab` и клонируйте его командой `git clone`.','Откройте draw.io и сохраните пустую диаграмму `.drawio` в папку репозитория.','Установите MySQL Workbench и проверьте подключение к локальному серверу.','Заполните таблицу сравнения инструментов в `README.md` и сделайте первый коммит.'],
+ ['Составьте таблицу из 8 инструментов: название, этап жизненного цикла, лицензия, основные функции.','Подготовьте скриншоты установленных программ с видимыми версиями.','Опишите, какие инструменты вы выбрали бы для интернет-магазина, и обоснуйте выбор.'],
+ ['Настройте в VS Code общие правила форматирования кода для команды.','Сравните два инструмента моделирования по 5 критериям и оформите вывод на одну страницу.'],
+ ['Какие классы инструментальных средств используются при разработке ИС?','Зачем нужна система контроля версий?','По каким критериям выбирают инструмент для проекта?','Чем среда разработки отличается от текстового редактора?'],
+ [['Какой инструмент относится к системам контроля версий?',['Postman','Git','draw.io','Excel'],1],['На каком этапе жизненного цикла чаще всего строят диаграммы?',['Проектирование','Закупка лицензий','Архивирование','Печать документов'],0],['Для проверки запросов к API обычно используют:',['MySQL Workbench','Postman','Access','Блокнот'],1]]),
+
+L('Проектирование структуры информационной системы',
+ 'Научиться описывать структуру ИС: определять акторов, требования, компоненты и связи между ними.',
+ ['Архитектура ИС описывает компоненты и связи между ними. Классическая трёхуровневая модель делит систему на слой представления (интерфейс), слой бизнес-логики и слой данных. Такое разделение упрощает сопровождение и позволяет менять компоненты независимо.','Структуру описывают средствами UML: диаграмма вариантов использования показывает, кто и что делает с системой, диаграмма компонентов показывает модули, диаграмма развёртывания показывает, где модули запускаются.'],
+ ['draw.io','PlantUML','Lucidchart'],
+ ['Выберите предметную область (например, учёт книг в библиотеке).','Определите акторов: читатель, библиотекарь, администратор.','Составьте список из 10 функциональных требований.','Постройте диаграмму вариантов использования в draw.io.','Постройте диаграмму компонентов с тремя уровнями архитектуры.','Опишите 5 нефункциональных требований: скорость, безопасность, доступность.'],
+ ['Оформите список акторов и требований в таблицу.','Приложите две диаграммы в формате PNG и исходный файл.','Кратко опишите, как слои системы взаимодействуют между собой.'],
+ ['Добавьте диаграмму развёртывания с сервером приложений и сервером БД.','Опишите две альтернативные архитектуры и сравните их.'],
+ ['Что такое актор?','Какие три уровня есть в классической архитектуре ИС?','Чем функциональные требования отличаются от нефункциональных?','Для чего нужна диаграмма компонентов?'],
+ [['Сколько уровней в классической трёхуровневой архитектуре?',['Два','Три','Пять','Семь'],1],['Какая диаграмма UML показывает акторов и их сценарии?',['Компонентов','Развёртывания','Вариантов использования','Классов'],2],['К нефункциональным требованиям относится:',['Добавление читателя','Время отклика не более 2 секунд','Выдача книги','Поиск по автору'],1]]),
+
+L('Создание диаграмм бизнес-процессов',
+ 'Освоить нотацию BPMN и построить модели процесса «как есть» и «как должно быть».',
+ ['BPMN — нотация для описания бизнес-процессов. Основные элементы: события (круги), задачи (прямоугольники), шлюзы (ромбы), потоки управления (стрелки), пулы и дорожки, которые показывают участников и роли.','Модель AS-IS описывает процесс в его текущем виде, TO-BE — после улучшения. Сравнение двух моделей помогает найти узкие места: ручные операции, ожидания, дублирование данных.'],
+ ['Camunda Modeler','Bizagi Modeler','draw.io'],
+ ['Выберите процесс: приём заявки на ремонт оборудования.','Определите участников и создайте пул с дорожками.','Нарисуйте стартовое событие и основные задачи.','Добавьте шлюз для проверки условия (заявка принята или отклонена).','Добавьте конечные события для каждого исхода.','Постройте вторую модель TO-BE и выделите изменения цветом.'],
+ ['Постройте модель AS-IS не менее чем из 8 элементов.','Постройте модель TO-BE с автоматизацией хотя бы двух шагов.','Опишите три найденных узких места.'],
+ ['Добавьте подпроцесс и обработку ошибки.','Оцените время выполнения процесса до и после улучшения.'],
+ ['Что обозначает шлюз в BPMN?','Чем AS-IS отличается от TO-BE?','Для чего нужны дорожки?','Какие события бывают в BPMN?'],
+ [['Что в BPMN обозначает ромб?',['Задачу','Шлюз','Событие','Артефакт'],1],['Модель «как есть» называется:',['TO-BE','AS-IS','CRUD','UML'],1],['Дорожка (lane) показывает:',['Тип данных','Исполнителя или роль','Время','Стоимость'],1]]),
+
+L('Проектирование базы данных в MySQL',
+ 'Построить инфологическую и логическую модель базы данных и привести её к третьей нормальной форме.',
+ ['Проектирование начинается с ER-модели: сущности, атрибуты и связи. Каждая сущность получает первичный ключ, связи реализуются внешними ключами. Связь «многие ко многим» разбивают на две связи «один ко многим» через связующую таблицу.','Нормализация устраняет избыточность. Первая нормальная форма требует неделимых значений, вторая устраняет частичные зависимости от составного ключа, третья устраняет транзитивные зависимости между неключевыми атрибутами.'],
+ ['MySQL Workbench','draw.io'],
+ ['Опишите предметную область «Интернет-магазин» и выделите 6 сущностей.','Нарисуйте ER-диаграмму в MySQL Workbench (File → New Model).','Определите первичные и внешние ключи, типы данных.','Проверьте таблицы на соответствие 1НФ, 2НФ и 3НФ.','Добавьте связующую таблицу для связи «заказ — товар».','Сгенерируйте SQL-скрипт через Forward Engineer и сохраните файл.'],
+ ['Приложите ER-диаграмму и SQL-скрипт.','Опишите каждую таблицу: назначение, ключи, ограничения.','Покажите пример нормализации одной таблицы до 3НФ.'],
+ ['Добавьте ограничения `CHECK` и значения по умолчанию.','Спроектируйте историю изменения цены товара.'],
+ ['Что такое первичный и внешний ключ?','Как реализуют связь «многие ко многим»?','Какие проблемы решает нормализация?','Чем 3НФ отличается от 2НФ?'],
+ [['Какой ключ однозначно идентифицирует запись в таблице?',['Внешний','Первичный','Составной индекс','Альтернативный текст'],1],['Связь «многие ко многим» реализуют через:',['Дополнительный столбец','Связующую таблицу','Представление','Триггер'],1],['Третья нормальная форма устраняет:',['Повторяющиеся группы','Частичные зависимости','Транзитивные зависимости','Индексы'],2]]),
+
+L('Создание и управление базой данных',
+ 'Создать базу данных средствами SQL, наполнить её данными и освоить запросы, индексы, транзакции и резервное копирование.',
+ ['Язык SQL делится на DDL (создание структур: `CREATE`, `ALTER`, `DROP`), DML (работа с данными: `INSERT`, `UPDATE`, `DELETE`, `SELECT`) и DCL (права доступа: `GRANT`, `REVOKE`). Для объединения таблиц применяют `JOIN`, для агрегирования — `GROUP BY`.','Транзакция группирует операции в единое целое: `COMMIT` фиксирует изменения, `ROLLBACK` отменяет. Индексы ускоряют поиск, но замедляют запись. Резервную копию создают утилитой `mysqldump`.'],
+ ['MySQL Workbench','Консоль MySQL','mysqldump'],
+ ['Выполните `CREATE DATABASE shop CHARACTER SET utf8mb4;`.','Создайте таблицы из лабораторной работы 4 командами `CREATE TABLE`.','Добавьте не менее 10 записей в каждую основную таблицу.','Напишите 5 запросов `SELECT` с `JOIN`, `WHERE` и `GROUP BY`.','Создайте индекс по часто используемому полю и сравните время запроса.','Создайте пользователя с правами только на чтение и выполните резервную копию.'],
+ ['Приложите файл `schema.sql` и `data.sql`.','Приложите 5 запросов с результатами.','Опишите, как выполняли резервное копирование и восстановление.'],
+ ['Напишите хранимую процедуру для оформления заказа.','Создайте представление для отчёта по продажам.'],
+ ['Чем DDL отличается от DML?','Для чего нужны транзакции?','Как работают индексы?','Как ограничить права пользователя?'],
+ [['Какая команда добавляет строку в таблицу?',['SELECT','INSERT','ALTER','DROP'],1],['Какой оператор объединяет таблицы по ключу?',['JOIN','LIMIT','ORDER BY','DISTINCT'],0],['Команда для отмены транзакции:',['COMMIT','ROLLBACK','SAVE','CLOSE'],1]]),
+
+L('Разработка веб-интерфейса с HTML и CSS',
+ 'Создать адаптивный веб-интерфейс информационной системы с семантической разметкой.',
+ ['HTML задаёт структуру страницы с помощью семантических тегов: `header`, `nav`, `main`, `section`, `footer`. CSS отвечает за оформление: цвета, шрифты, отступы и раскладку.','Современная раскладка строится на `flex` и `grid`. Адаптивность обеспечивают относительные единицы, гибкие сетки и медиазапросы `@media`, которые меняют стили в зависимости от ширины экрана.'],
+ ['VS Code','Chrome DevTools','Live Server'],
+ ['Создайте файлы `index.html` и `style.css` и подключите стили.','Разметьте шапку, меню, основное содержимое и подвал семантическими тегами.','Сделайте таблицу или карточки с данными из вашей предметной области.','Добавьте раскладку на `flex` или `grid`.','Добавьте медиазапрос для ширины до 700px.','Проверьте страницу в DevTools в режиме мобильного устройства.'],
+ ['Создайте страницу каталога из 6 карточек.','Добейтесь корректного отображения на экране шириной 360px.','Приложите скриншоты для компьютера и телефона.'],
+ ['Добавьте тёмную тему через `prefers-color-scheme`.','Реализуйте анимацию при наведении на карточки.'],
+ ['Зачем нужны семантические теги?','Чем `flex` отличается от `grid`?','Что такое медиазапрос?','Какие относительные единицы измерения вы знаете?'],
+ [['Какой тег задаёт основное содержимое страницы?',['main','aside','footer','nav'],0],['Какое свойство включает гибкую раскладку?',['display: flex','float: auto','position: flex','clear: both'],0],['Для адаптивности применяют:',['@media','z-index','!important','@charset'],0]]),
+
+L('Создание интерактивных веб-форм с JavaScript',
+ 'Реализовать форму ввода данных с проверкой значений и сохранением результата в браузере.',
+ ['JavaScript работает с деревом документа (DOM): находит элементы через `document.querySelector`, меняет содержимое и подписывается на события через `addEventListener`.','Форма отправляется событием `submit`. Чтобы проверить данные до отправки, вызывают `event.preventDefault()`, проверяют поля и показывают ошибки. Для хранения данных на стороне клиента используют `localStorage`.'],
+ ['VS Code','Консоль браузера'],
+ ['Создайте форму регистрации читателя: ФИО, email, телефон, дата рождения.','Подключите скрипт `app.js` и найдите форму по `id`.','Обработайте событие `submit` и вызовите `preventDefault()`.','Напишите проверки: поля не пусты, email содержит `@`, телефон состоит из цифр.','Показывайте сообщения об ошибках рядом с полем.','Сохраняйте записи в `localStorage` и выводите их списком.'],
+ ['Приложите файлы `index.html`, `style.css`, `app.js`.','Реализуйте удаление записи из списка.','Покажите работу формы скриншотами с ошибками и успешным вводом.'],
+ ['Добавьте поиск и сортировку списка.','Добавьте экспорт данных в формат JSON.'],
+ ['Что такое DOM?','Зачем вызывают `preventDefault()`?','Чем `localStorage` отличается от cookie?','Почему проверку данных нужно выполнять и на сервере?'],
+ [['Метод для отмены стандартной отправки формы:',['preventDefault()','stopServer()','cancelForm()','returnHtml()'],0],['Как получить элемент по идентификатору?',['document.getElementById()','document.find()','window.id()','dom.get()'],0],['localStorage хранит данные:',['На сервере','В браузере пользователя','В базе MySQL','Только до закрытия вкладки'],1]]),
+
+L('Разработка информационной системы в MS Access',
+ 'Создать настольную информационную систему с таблицами, связями, запросами, формами и отчётами.',
+ ['MS Access объединяет СУБД и средства разработки интерфейса. Основные объекты: таблицы, запросы, формы, отчёты и макросы. Связи между таблицами задают в схеме данных с обеспечением целостности.','Запросы на выборку отбирают данные по условию, итоговые запросы считают суммы и количества, параметрические запросы просят значения у пользователя. Формы упрощают ввод, отчёты готовят данные к печати.'],
+ ['Microsoft Access'],
+ ['Создайте базу «Учёт студентов» и таблицы «Студенты», «Группы», «Оценки».','Задайте ключи и типы полей, добавьте поле подстановки для группы.','Настройте схему данных и включите обеспечение целостности.','Создайте 4 запроса: выборка, с параметром, итоговый и перекрёстный.','Создайте форму для ввода студентов и кнопочную форму для навигации.','Создайте отчёт со списком по группам и итогами.'],
+ ['Приложите файл `.accdb`.','Приложите скриншоты схемы данных, форм и отчёта.','Опишите условия отбора в каждом запросе.'],
+ ['Добавьте макрос, который открывает форму по кнопке.','Реализуйте окно входа с проверкой пароля.'],
+ ['Какие объекты есть в Access?','Что такое обеспечение целостности данных?','Чем форма отличается от отчёта?','Как создать запрос с параметром?'],
+ [['Объект Access для удобного ввода данных:',['Форма','Макрос','Модуль','Индекс'],0],['Поле подстановки позволяет:',['Печатать отчёт','Выбирать значение из другой таблицы или списка','Создавать копию базы','Задавать пароль'],1],['Запрос, который отбирает записи по условию:',['Запрос на выборку','Отчёт','Форма','Модуль'],0]]),
+
+L('Автоматизация обработки данных в Excel',
+ 'Научиться обрабатывать и анализировать данные с помощью формул, сводных таблиц и макросов.',
+ ['Для поиска данных применяют `ВПР` и `XLOOKUP`, для условного суммирования — `СУММЕСЛИ` и `СУММЕСЛИМН`, для логики — `ЕСЛИ`. Таблицы форматируют как «умные», чтобы формулы расширялись автоматически.','Сводные таблицы агрегируют данные без формул. Power Query загружает и очищает данные из разных источников. Макросы на VBA записывают повторяющиеся действия и выполняют их одной кнопкой.'],
+ ['Microsoft Excel','Power Query'],
+ ['Загрузите таблицу продаж не менее чем на 100 строк.','Оформите её как умную таблицу и добавьте вычисляемые столбцы.','Найдите цены из справочника с помощью `ВПР` или `XLOOKUP`.','Постройте сводную таблицу по месяцам и категориям.','Добавьте срезы и диаграмму.','Запишите макрос, который форматирует отчёт, и назначьте его кнопке.'],
+ ['Приложите файл `.xlsx` с отдельными листами для данных и отчёта.','Опишите используемые формулы.','Добавьте условное форматирование для значений ниже плана.'],
+ ['Настройте Power Query для объединения двух файлов.','Напишите макрос, который сохраняет отчёт в PDF.'],
+ ['Чем `ВПР` отличается от `XLOOKUP`?','Для чего нужны сводные таблицы?','Что такое макрос?','Какие преимущества у умных таблиц?'],
+ [['Какая функция ищет значение в таблице по ключу?',['ВПР','СУММ','СЧЁТ','ОКРУГЛ'],0],['Сводная таблица нужна для:',['Рисования схем','Агрегирования и анализа данных','Шифрования файлов','Проверки орфографии'],1],['Макросы в Excel записываются на языке:',['VBA','SQL','PHP','Swift'],0]]),
+
+L('Создание информационной системы с помощью no-code платформ',
+ 'Собрать работающее приложение без программирования и оценить возможности и ограничения no-code подхода.',
+ ['No-code платформы позволяют создавать приложения из готовых блоков: таблиц, форм, списков и автоматизаций. Примеры: Airtable, Notion, Google AppSheet, Glide, Bubble. Такой подход ускоряет разработку прототипов и внутренних инструментов.','Ограничения: зависимость от тарифа и поставщика, ограничения по производительности и настройке, сложность переноса данных. Перед выбором проверяют стоимость, лимиты записей, возможность экспорта и интеграции через API.'],
+ ['Airtable','Google AppSheet','Glide'],
+ ['Выберите задачу: учёт заявок в студенческом клубе.','Создайте базу в Airtable с таблицами «Участники», «Заявки», «Мероприятия».','Настройте типы полей и связи между таблицами.','Создайте формы для приёма заявок и представления с фильтрами.','Добавьте автоматизацию: уведомление на почту при новой заявке.','Создайте мобильный интерфейс через Glide или AppSheet.'],
+ ['Приложите ссылку на приложение и скриншоты.','Опишите 3 преимущества и 3 ограничения выбранной платформы.','Сравните трудозатраты с разработкой на коде.'],
+ ['Подключите приложение к внешнему сервису через webhook.','Настройте роли пользователей и права доступа.'],
+ ['Что такое no-code?','Для каких задач no-code подходит лучше всего?','Какие риски связаны с no-code платформами?','Как перенести данные с одной платформы на другую?'],
+ [['No-code платформа позволяет:',['Создавать приложения без написания кода','Только писать код вручную','Компилировать программы на C++','Настраивать сетевое оборудование'],0],['Что важно проверить перед выбором платформы?',['Цвет логотипа','Лимиты тарифа и возможность экспорта данных','Имя основателя','Длину названия'],1],['Airtable по устройству ближе всего к:',['Реляционной базе с табличным интерфейсом','Графическому редактору','Антивирусу','Почтовому клиенту'],0]]),
+
+L('Работа с REST API',
+ 'Освоить принципы REST, отправлять запросы к API и обрабатывать ответы в формате JSON.',
+ ['REST — стиль построения API поверх HTTP. Ресурсы адресуются URL, действия задаются методами: `GET` читает, `POST` создаёт, `PUT` и `PATCH` изменяют, `DELETE` удаляет. Сервер отвечает кодом состояния: 200 — успех, 201 — создано, 400 — ошибка запроса, 401 — нет авторизации, 404 — не найдено, 500 — ошибка сервера.','Данные чаще всего передают в формате JSON. В браузере запросы отправляют функцией `fetch`, а для проверки API вручную применяют Postman.'],
+ ['Postman','fetch (JavaScript)','Публичный тестовый API'],
+ ['Выберите публичный API (например, JSONPlaceholder) и изучите документацию.','В Postman отправьте `GET` запрос списка ресурсов и изучите структуру JSON.','Отправьте `POST` запрос с телом JSON и проверьте код ответа.','Отправьте `PUT` и `DELETE` запросы и зафиксируйте результаты.','Напишите на JavaScript функцию с `fetch`, которая выводит данные списком.','Добавьте обработку ошибок: сеть недоступна, код 404.'],
+ ['Сохраните коллекцию Postman и приложите файл экспорта.','Приложите скриншоты запросов с кодами ответов.','Приложите HTML-страницу, которая выводит данные из API.'],
+ ['Добавьте пагинацию и фильтрацию по параметрам запроса.','Напишите автоматические тесты в Postman.'],
+ ['Что такое REST?','Какие методы HTTP вы знаете и для чего они нужны?','Что означают коды 201, 401 и 404?','Почему JSON удобен для обмена данными?'],
+ [['Какой метод обычно создаёт новый ресурс?',['GET','POST','HEAD','TRACE'],1],['Код ответа «не найдено»:',['200','301','404','500'],2],['Основной формат обмена данными в REST API:',['JSON','BMP','MP3','EXE'],0]]),
+
+L('Тестирование информационной системы',
+ 'Составить план тестирования, подготовить тест-кейсы, найти и описать ошибки.',
+ ['Виды тестирования: модульное (отдельные функции), интеграционное (взаимодействие модулей), системное (вся система), приёмочное (соответствие требованиям заказчика), нагрузочное (поведение при большом числе пользователей).','Тест-кейс содержит предусловия, шаги, ожидаемый результат. Найденную ошибку оформляют баг-репортом: заголовок, шаги воспроизведения, фактический и ожидаемый результат, окружение, серьёзность.'],
+ ['Postman','pytest или Jest','Чек-листы и таблицы'],
+ ['Выберите систему из предыдущих лабораторных работ.','Составьте план тестирования: что, как и в какой последовательности проверять.','Подготовьте 15 тест-кейсов, включая негативные.','Выполните тестирование и зафиксируйте результаты в таблице.','Оформите не менее трёх баг-репортов.','Напишите 3 автоматических модульных теста.'],
+ ['Приложите план тестирования и таблицу тест-кейсов.','Приложите баг-репорты и файлы автотестов.','Сделайте вывод о качестве системы.'],
+ ['Настройте запуск тестов при каждом коммите.','Проведите простое нагрузочное тестирование API.'],
+ ['Чем модульное тестирование отличается от интеграционного?','Что должен содержать баг-репорт?','Что такое негативный тест-кейс?','Зачем нужны автоматические тесты?'],
+ [['Тестирование отдельных функций называется:',['Модульное','Приёмочное','Нагрузочное','Визуальное'],0],['Что обязательно есть в баг-репорте?',['Шаги воспроизведения','Цвет монитора','Фамилия директора','Размер шрифта'],0],['Нагрузочное тестирование проверяет:',['Поведение при большом числе пользователей','Орфографию','Цветовую схему','Лицензии'],0]]),
+
+L('Разработка системы регистрации и авторизации',
+ 'Реализовать безопасную регистрацию, вход и разграничение прав пользователей.',
+ ['Аутентификация проверяет, кто пользователь, авторизация определяет, что ему разрешено. Пароли хранят только в виде хеша с солью (bcrypt, Argon2), никогда в открытом виде. Данные передают по HTTPS.','После входа сервер выдаёт сессию или токен JWT, который клиент передаёт в заголовке `Authorization`. Роли (студент, преподаватель, администратор) определяют доступные разделы.'],
+ ['Node.js или PHP','MySQL','Postman'],
+ ['Создайте таблицу `users` с полями email, password_hash, role.','Реализуйте форму регистрации с проверкой email и длины пароля.','Хешируйте пароль на сервере и сохраняйте хеш.','Реализуйте вход: найдите пользователя, сравните хеш, выдайте сессию или JWT.','Закройте страницы личного кабинета от неавторизованных пользователей.','Добавьте роли и проверку прав на странице администратора.'],
+ ['Приложите исходный код и SQL-скрипт.','Покажите скриншотами регистрацию, вход и отказ в доступе.','Опишите, как защищены пароли.'],
+ ['Добавьте ограничение числа попыток входа.','Реализуйте восстановление пароля по одноразовой ссылке.'],
+ ['Чем аутентификация отличается от авторизации?','Почему нельзя хранить пароли в открытом виде?','Что такое соль и зачем она нужна?','Как работает JWT?'],
+ [['Как правильно хранить пароль?',['В открытом виде','В виде хеша с солью','В cookie','В адресной строке'],1],['Аутентификация — это:',['Проверка личности пользователя','Назначение прав','Шифрование диска','Резервное копирование'],0],['JWT чаще всего передают в заголовке:',['Authorization','Content-Length','Host','Accept'],0]]),
+
+L('Использование искусственного интеллекта при разработке информационных систем',
+ 'Научиться применять ИИ-ассистентов для анализа, генерации кода, тестов и документации и критически проверять результат.',
+ ['ИИ-ассистенты помогают формулировать требования, писать SQL-запросы и код, находить ошибки, генерировать тесты и документацию. Качество ответа зависит от промпта: нужно указать контекст, задачу, ограничения и желаемый формат.','Результат ИИ всегда проверяют: код может содержать ошибки и уязвимости, ссылки на несуществующие функции, устаревшие подходы. Нельзя передавать в публичные сервисы пароли, персональные данные и закрытый код организации.'],
+ ['ИИ-ассистент (чат)','VS Code','Git'],
+ ['Сформулируйте промпт для генерации SQL-схемы вашей предметной области.','Сравните результат со схемой из лабораторной работы 4 и найдите расхождения.','Попросите ассистента написать функцию валидации формы и протестируйте её.','Попросите найти ошибки в своём коде и проверьте каждое замечание вручную.','Сгенерируйте тест-кейсы для функции регистрации и добавьте свои.','Составьте правила безопасного использования ИИ в вашей команде.'],
+ ['Приложите три промпта и ответы ассистента.','Опишите, что пришлось исправить в сгенерированном коде.','Приложите список правил безопасного использования.'],
+ ['Сравните ответы двух ассистентов на один промпт.','Создайте шаблон промпта для код-ревью.'],
+ ['Из чего состоит хороший промпт?','Какие риски связаны с кодом от ИИ?','Какие данные нельзя отправлять в публичные ИИ-сервисы?','Как проверить корректность сгенерированного SQL-запроса?'],
+ [['Главный риск при использовании кода от ИИ:',['Он всегда безошибочен','Он может содержать ошибки и уязвимости','Он никогда не запускается','Он всегда платный'],1],['Что нельзя отправлять в публичный ИИ-сервис?',['Учебные примеры','Пароли и персональные данные','Общие вопросы','Описание задачи'],1],['Хороший промпт содержит:',['Контекст, задачу и формат ответа','Только слово «сделай»','Случайный текст','Пароли'],0]]),
+
+L('Итоговый проект',
+ 'Разработать законченную информационную систему и защитить проект, используя инструменты всего курса.',
+ ['Итоговый проект объединяет все этапы: анализ требований, проектирование, база данных, интерфейс, программная логика, тестирование и документация. Тему выбирают из предложенных или согласовывают с преподавателем.','Результат — работающая система, репозиторий с инструкцией запуска, пакет документации и короткая демонстрация. Оценивают полноту реализации, качество проектирования, тестирование и умение объяснить принятые решения.'],
+ ['Git и GitHub','MySQL','VS Code','draw.io','Postman'],
+ ['Выберите тему и согласуйте её с преподавателем.','Подготовьте требования, диаграммы вариантов использования и бизнес-процессов.','Спроектируйте и создайте базу данных.','Разработайте интерфейс и серверную часть с авторизацией.','Подготовьте и выполните тест-кейсы, исправьте найденные ошибки.','Оформите `README.md`, подготовьте презентацию и демонстрацию.'],
+ ['Приложите архив проекта или ссылку на репозиторий.','Приложите пакет документации: требования, диаграммы, схема БД, тесты.','Подготовьте презентацию на 5–7 слайдов.'],
+ ['Разверните систему на хостинге и приложите ссылку.','Добавьте раздел аналитики для администратора.'],
+ ['Какие этапы вы прошли при разработке проекта?','Какие инструменты оказались самыми полезными и почему?','Как вы проверяли качество системы?','Что бы вы улучшили в следующей версии?'],
+ [['Что входит в документацию проекта?',['Требования, схемы, инструкция, результаты тестов','Только логотип','Только код без описания','Фотографии'],0],['Перед защитой проекта нужно:',['Проверить, что демонстрация запускается с нуля','Удалить документацию','Отключить тесты','Заменить базу данных'],0],['Репозиторий проекта должен содержать:',['README с инструкцией запуска','Пароли администратора','Только изображения','Пустую папку'],0]])
+].map((l,i)=>({n:i+1,...l}));
+
+/* ===================== Данные и хранение ===================== */
+const KEY='istools_v1', PASS=60;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=s=>esc(s).replace(/`([^`]+)`/g,'<code>$1</code>');
+const hash=s=>{let h=5381;for(const c of String(s))h=((h<<5)+h+c.codePointAt(0))>>>0;return h.toString(36)};
+let mem=null;
+function loadDb(){try{const s=localStorage.getItem(KEY);if(s)return JSON.parse(s)}catch(e){}return mem}
+function save(){mem=db;try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}}
+function seed(){
+  const d={users:[
+    {email:'teacher@istools.kg',name:'Асанова Нурия Маратовна',pass:hash('teacher123'),role:'teacher',at:Date.now()-9e8},
+    {email:'aibek@demo.kg',name:'Сыдыков Айбек',pass:hash('demo123'),role:'student',at:Date.now()-8e8},
+    {email:'meerim@demo.kg',name:'Токтогулова Мээрим',pass:hash('demo123'),role:'student',at:Date.now()-7e8},
+    {email:'daniyar@demo.kg',name:'Эркинов Данияр',pass:hash('demo123'),role:'student',at:Date.now()-6e8}],
+    prog:{},over:{},session:null};
+  const mk=(email,count,pending)=>{
+    for(let n=1;n<=count;n++){
+      d.prog[email]=d.prog[email]||{};
+      d.prog[email][n]={steps:LABS[n-1].steps.map(()=>true),test:[67,100,100,67][(n+email.length)%4]||100,attempts:1,
+        sub:{file:{name:'lab'+n+'_report.pdf',size:150000+n*9000},link:'',note:'Работа выполнена, отчёт во вложении.',at:Date.now()-(20-n)*864e5,status:'checked',grade:[78,85,92,88,95][(n+email.length)%5],feedback:'Работа принята. Оформление и выводы выполнены хорошо.'}};
+    }
+    if(pending){const n=count+1;d.prog[email]=d.prog[email]||{};
+      d.prog[email][n]={steps:LABS[n-1].steps.map(()=>true),test:100,attempts:1,sub:{file:{name:'lab'+n+'_report.docx',size:210000},link:'https://github.com/demo/lab'+n,note:'Прошу проверить работу.',at:Date.now()-36e5*5,status:'submitted'}}}
+  };
+  mk('aibek@demo.kg',4,true);mk('meerim@demo.kg',2,false);
+  d.prog['meerim@demo.kg'][3]={steps:LABS[2].steps.map((_,i)=>i<3),test:null,attempts:0,sub:null};
+  d.prog['daniyar@demo.kg']={1:{steps:LABS[0].steps.map((_,i)=>i<2),test:null,attempts:0,sub:null}};
+  return d;
+}
+let db=loadDb()||seed(); save();
+
+const me=()=>db.users.find(u=>u.email===db.session)||null;
+function P(email,n){const p=db.prog[email]||(db.prog[email]={});return p[n]||(p[n]={steps:[],test:null,attempts:0,sub:null})}
+function lab(n){const b=LABS[n-1],o=db.over[n]||{};return {...b,goal:o.goal||b.goal,tasks:o.tasks||b.tasks,adv:o.adv||b.adv}}
+function stat(email,n){const p=P(email,n),s=p.sub&&p.sub.status;
+  if(s==='checked')return 'done'; if(s==='submitted')return 'review'; if(s==='returned')return 'returned';
+  return (p.steps.some(Boolean)||p.test!=null)?'progress':'new'}
+function isDone(email,n){const p=P(email,n);return p.test!=null&&p.test>=PASS&&!!p.sub&&(p.sub.status==='submitted'||p.sub.status==='checked')}
+function pts(email,n){const p=P(email,n);const t=p.test==null?0:p.test*.4;const s=p.sub&&p.sub.status==='checked'?p.sub.grade*.6:0;return Math.round((t+s)*10)/10}
+function total(email){let s=0;for(let n=1;n<=15;n++)s+=pts(email,n);return Math.round(s/15*10)/10}
+function doneCount(email){let c=0;for(let n=1;n<=15;n++)if(isDone(email,n))c++;return c}
+function labPct(email,n){const p=P(email,n),L0=LABS[n-1].steps.length;const a=p.steps.filter(Boolean).length/L0;return Math.round((a+(p.test!=null&&p.test>=PASS?1:0)+(p.sub&&p.sub.status!=='returned'?1:0))/3*100)}
+function gradeText(sc){return sc>=90?'Отлично (5)':sc>=75?'Хорошо (4)':sc>=60?'Удовлетворительно (3)':'Неудовлетворительно (2)'}
+const STATUS={new:['Не начата',''],progress:['В процессе','blue'],review:['На проверке','warn'],done:['Проверена','good'],returned:['Возвращена','bad']};
+const chip=s=>`<span class="chip ${STATUS[s][1]}">${STATUS[s][0]}</span>`;
+const fdate=t=>new Date(t).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
+const fsize=b=>b>1048576?(b/1048576).toFixed(1)+' МБ':Math.max(1,Math.round(b/1024))+' КБ';
+
+/* ===================== Интерфейс ===================== */
+const ic={
+ home:'<path d="M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/>',
+ labs:'<path d="M9 3h6M10 3v6l-5 9a2 2 0 002 3h10a2 2 0 002-3l-5-9V3"/>',
+ user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+ cert:'<circle cx="12" cy="9" r="6"/><path d="M8.5 14L7 22l5-3 5 3-1.500-8"/>',
+ teach:'<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>',
+ out:'<path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>'};
+const svg=n=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ic[n]}</svg>`;
+function ring(pct,light){const r=64,c=2*Math.PI*r;return `<div class="ring ${light?'light':''}"><svg viewBox="0 0 150 150"><circle class="bgc" cx="75" cy="75" r="${r}" fill="none" stroke-width="12"/><circle class="fg" cx="75" cy="75" r="${r}" fill="none" stroke-width="12" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-pct/100)}"/></svg><div class="lab"><span>${pct}%<small>выполнено</small></span></div></div>`}
+
+const ui={filter:'all',tab:'students',authTab:'login',err:'',ans:{},res:{},next:null,dl:false};
+let curRoute='home';
+
+function routeInfo(){
+  const h=(location.hash||'#home').slice(1);const m=h.match(/^lab-(\d+)$/);
+  if(m&&+m[1]>=1&&+m[1]<=15)return {name:'lab',n:+m[1]};
+  return {name:['home','labs','cabinet','certificate','teacher','login'].includes(h)?h:'home'};
+}
+function go(h){if(location.hash==='#'+h)render();else location.hash=h}
+
+function sidebar(r){
+  const u=me();
+  const a=(h,i,t,on)=>`<a href="#${h}" class="${on?'on':''}">${svg(i)}${t}</a>`;
+  let nav=a('home','home','Главная',r.name==='home')+a('labs','labs','Лабораторные работы',r.name==='labs'||r.name==='lab');
+  if(u){nav+=a('cabinet','user','Личный кабинет',r.name==='cabinet')+a('certificate','cert','Сертификат',r.name==='certificate');
+    if(u.role==='teacher')nav+=a('teacher','teach','Панель преподавателя',r.name==='teacher')}
+  let mini='';
+  if(u&&u.role==='student'){mini='<div><h5>Быстрый переход</h5><div class="mini">'+LABS.map(l=>{const s=stat(u.email,l.n);return `<a href="#lab-${l.n}" title="${esc(l.title)}" class="s-${s} ${r.n===l.n?'cur':''}">${l.n}</a>`}).join('')+'</div></div>'}
+  else mini='<div><h5>Быстрый переход</h5><div class="mini">'+LABS.map(l=>`<a href="#lab-${l.n}" title="${esc(l.title)}" class="${r.n===l.n?'cur':''}">${l.n}</a>`).join('')+'</div></div>';
+  const who=u?`<div class="who"><div><b>${esc(u.name)}</b><small>${u.role==='teacher'?'Преподаватель':'Студент'}</small></div><button class="btn-ghost-side" data-a="logout">Выйти</button></div>`
+    :`<div class="who"><small>Войдите, чтобы сохранять прогресс и проходить тесты</small><button class="btn-side" data-a="toLogin">Войти или зарегистрироваться</button></div>`;
+  $('#side').innerHTML=`<div class="brand"><div class="logo">IS</div><div><b>IS Tools</b><span>Образовательная лаборатория</span></div></div><nav class="nav">${nav}</nav>${mini}${who}`;
+}
+
+function render(keep){
+  const y=window.scrollY;let r=routeInfo();
+  const protectedR=['cabinet','certificate','teacher','lab'];
+  if(protectedR.includes(r.name)&&!me()){ui.next=location.hash.slice(1);r={name:'login'};}
+  if(r.name==='teacher'&&(!me()||me().role!=='teacher'))r={name:'home'};
+  if(r.name==='login'&&me()){r={name:'home'}}
+  curRoute=r.name;
+  sidebar(r);
+  const v=$('#view');
+  const fn={home:vHome,labs:vLabs,lab:vLab,cabinet:vCabinet,certificate:vCert,teacher:vTeacher,login:vAuth}[r.name];
+  v.innerHTML=fn(r);
+  closeMenu();
+  if(r.name==='certificate')drawCertView();
+  if(r.name==='certificate'&&ui.dl)document.querySelectorAll('[data-dl]').forEach(b=>b.hidden=false);
+  if(keep)window.scrollTo(0,y);else window.scrollTo(0,0);
+}
+
+function vHome(){
+  const u=me(),student=u&&u.role==='student';
+  const dc=student?doneCount(u.email):0,pct=Math.round(dc/15*100);
+  const start=u?(student?`#lab-${nextLab(u.email)}`:'#teacher'):'#login';
+  return `<div class="wrap">
+  <section class="hero"><div><span class="tag">Дисциплина · Высшее образование</span>
+    <h1>Инструментальные средства информационной системы</h1>
+    <p>Практический курс из 15 лабораторных работ: от выбора инструментов и проектирования до разработки, тестирования и защиты итогового проекта.</p>
+    <a class="btn" href="${start}">Начать обучение
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+    ${ring(pct)}</section>
+  <div class="stats">
+    <div class="stat"><b>15</b><span>лабораторных работ</span></div>
+    <div class="stat"><b>45</b><span>вопросов в автотестах</span></div>
+    <div class="stat"><b>${student?dc:0}/15</b><span>работ выполнено</span></div>
+    <div class="stat"><b>${student?total(u.email):0}</b><span>баллов из 100 сейчас</span></div></div>
+  <div class="cols">
+    <section class="card"><h2>О курсе</h2><p class="muted">Курс учит применять современные инструментальные средства на всех этапах жизненного цикла информационной системы. Каждая работа содержит теорию, пошаговую инструкцию, практические и дополнительные задания, контрольные вопросы и автоматический тест. Выполненную работу вы отправляете преподавателю на проверку.</p></section>
+    <section class="card"><h2>Как начисляются баллы</h2><ul class="list"><li>Тест после работы даёт до 40 баллов, проходной порог — ${PASS}%.</li><li>Проверка преподавателем даёт до 60 баллов.</li><li>Итог — средний балл по 15 работам.</li><li>Сертификат выдаётся после сдачи всех работ и прохождения всех тестов.</li></ul></section></div>
+  <div class="cols">
+    <section class="card"><h2>Цели обучения</h2><ul class="list"><li>Выбирать инструментальные средства под задачу и этап проекта.</li><li>Проектировать структуру, процессы и базу данных информационной системы.</li><li>Разрабатывать интерфейсы, формы и серверную логику.</li><li>Работать с API, тестировать и защищать систему.</li></ul></section>
+    <section class="card"><h2>Задачи обучения</h2><ul class="list"><li>Освоить моделирование в UML и BPMN.</li><li>Научиться писать SQL и проектировать БД в MySQL.</li><li>Создать системы в MS Access, Excel и no-code платформах.</li><li>Применять ИИ-ассистентов с проверкой результата.</li></ul></section></div>
+  ${u?'':`<div class="notice">Демо-доступ: студент <b>aibek@demo.kg</b> / <b>demo123</b>, преподаватель <b>teacher@istools.kg</b> / <b>teacher123</b>.</div>`}
+  </div>`;
+}
+function nextLab(email){for(let n=1;n<=15;n++)if(!isDone(email,n))return n;return 15}
+
+function vLabs(){
+  const u=me(),f=ui.filter;
+  const ok=l=>{if(!u||f==='all')return true;const s=stat(u.email,l.n);
+    return f==='progress'?(s==='progress'||s==='returned'):f==='review'?s==='review':f==='done'?s==='done':s==='new'};
+  const list=LABS.filter(ok);
+  const fl=[['all','Все'],['new','Не начаты'],['progress','В процессе'],['review','На проверке'],['done','Проверены']];
+  return `<div class="wrap"><div class="head-row"><div><h1>Лабораторные работы</h1><p class="muted">15 работ по дисциплине «Инструментальные средства информационной системы»</p></div>
+    ${u?`<div class="filters">${fl.map(([k,t])=>`<button data-a="filter" data-v="${k}" class="${f===k?'on':''}">${t}</button>`).join('')}</div>`:''}</div>
+    <div class="grid">${list.map(l=>{const s=u?stat(u.email,l.n):'new',pc=u?labPct(u.email,l.n):0;
+      return `<a class="lc s-${s}" href="#lab-${l.n}"><div style="display:flex;justify-content:space-between;align-items:center"><div class="num">${l.n}</div>${u?chip(s):''}</div>
+      <h3>${esc(l.title)}</h3><div class="bar"><i style="width:${pc}%"></i></div>
+      <div class="row"><span class="muted" style="font-size:13px">${u?pc+'% выполнено':l.steps.length+' шагов · тест'}</span><span class="chip blue">Открыть</span></div></a>`}).join('')||'<div class="card muted">В этой категории пока нет работ.</div>'}</div></div>`;
+}
+
+function vLab(r){
+  const u=me(),n=r.n,l=lab(n);
+  if(u.role==='teacher')return vLabTeacher(l);
+  const p=P(u.email,n),s=stat(u.email,n),pc=labPct(u.email,n);
+  const res=ui.res[n];
+  const testHtml=l.test.map((t,i)=>`<div class="q"><b>${i+1}. ${esc(t[0])}</b>${t[1].map((o,j)=>{
+    let cl='';if(res){if(j===t[2])cl='ok';else if(res.sel[i]===j)cl='no'}
+    const chk=(res?res.sel[i]===j:ui.ans[n]&&ui.ans[n][i]===j)?'checked':'';
+    return `<label class="opt ${cl}"><input type="radio" name="q${n}_${i}" value="${j}" data-a="ans" data-i="${i}" ${chk} ${res?'disabled':''}>${esc(o)}</label>`}).join('')}</div>`).join('');
+  const sub=p.sub;
+  return `<div class="wrap">
+  <a href="#labs" class="muted" style="text-decoration:none">← Все лабораторные работы</a>
+  <div class="card"><div class="lab-head"><div class="num">${n}</div><div style="min-width:0"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">${chip(s)}<span class="chip">Баллы: ${pts(u.email,n)} / 100</span>${p.test!=null?`<span class="chip ${p.test>=PASS?'good':'bad'}">Тест: ${p.test}%</span>`:''}</div><h1>Лабораторная работа № ${n}. ${esc(l.title)}</h1></div></div>
+    <div class="bar" style="margin-top:18px"><i style="width:${pc}%"></i></div><p class="muted" style="font-size:13px;margin-top:6px">Выполнено ${pc}% · прогресс сохраняется автоматически</p>
+    <div class="jump" style="margin-top:14px">${[['goal','Цель'],['theory','Теория'],['tools','Инструменты'],['steps','Инструкция'],['tasks','Задания'],['qs','Вопросы'],['test','Тест'],['send','Сдача работы']].map(([k,t])=>`<button data-a="goto" data-v="${k}">${t}</button>`).join('')}</div></div>
+  <section class="card" id="sec-goal"><h2>Цель работы</h2><p>${esc(l.goal)}</p></section>
+  <section class="card" id="sec-theory"><h2>Теоретические сведения</h2><div style="display:flex;flex-direction:column;gap:12px">${l.theory.map(t=>`<p>${fmt(t)}</p>`).join('')}</div></section>
+  <section class="card" id="sec-tools"><h2>Используемые программные инструменты</h2><div class="tools">${l.tools.map(t=>`<span class="chip blue" style="font-size:13px;padding:6px 12px">${esc(t)}</span>`).join('')}</div></section>
+  <section class="card" id="sec-steps"><h2>Пошаговая инструкция</h2><p class="muted" style="margin-bottom:14px">Отмечайте выполненные шаги, прогресс сохранится.</p>
+    <ol class="steps">${l.steps.map((t,i)=>`<li class="${p.steps[i]?'done':''}"><label><input type="checkbox" data-a="step" data-i="${i}" ${p.steps[i]?'checked':''}><span><b>Шаг ${i+1}.</b> ${fmt(t)}</span></label></li>`).join('')}</ol></section>
+  <section class="card" id="sec-tasks"><div class="cols"><div><h2>Практические задания</h2><ol class="list">${l.tasks.map(t=>`<li>${fmt(t)}</li>`).join('')}</ol></div>
+    <div><h2>Дополнительные задания повышенной сложности</h2><ol class="list">${l.adv.map(t=>`<li>${fmt(t)}</li>`).join('')}</ol></div></div></section>
+  <section class="card" id="sec-qs"><h2>Контрольные вопросы</h2>${l.qs.map((q,i)=>`<details><summary>${i+1}. ${fmt(q)}</summary><p class="muted" style="margin-top:8px">Ответ подготовьте в отчёте. Опирайтесь на теоретические сведения и результаты своей работы.</p></details>`).join('')}</section>
+  <section class="card" id="sec-test"><h2>Тест по лабораторной работе</h2><p class="muted" style="margin-bottom:14px">${l.test.length} вопроса, проходной порог ${PASS}%. Засчитывается лучший результат.</p>
+    ${testHtml}
+    ${res?`<div class="result" style="margin-top:14px"><b style="color:${res.score>=PASS?'var(--good)':'var(--bad)'}">${res.score}%</b><span>${res.score>=PASS?'Тест пройден. Начислено '+Math.round(p.test*.4*10)/10+' баллов из 40.':'Тест не пройден. Повторите теорию и попробуйте снова.'}</span><button class="btn alt sm" data-a="retry">Пройти ещё раз</button></div>`
+      :`<div style="margin-top:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button class="btn" data-a="check">Проверить ответы</button>${p.attempts?`<span class="muted">Попыток: ${p.attempts}, лучший результат: ${p.test}%</span>`:''}</div>`}</section>
+  <section class="card" id="sec-send"><h2>Отправка выполненной работы</h2>
+    ${sub&&sub.status==='checked'?`<div class="fb"><b>Проверено преподавателем: ${sub.grade} из 100</b> (${Math.round(sub.grade*.6*10)/10} баллов из 60)<p style="margin-top:6px">${esc(sub.feedback||'')}</p></div><div style="height:14px"></div>`:''}
+    ${sub&&sub.status==='returned'?`<div class="fb ret"><b>Работа возвращена на доработку</b><p style="margin-top:6px">${esc(sub.feedback||'')}</p></div><div style="height:14px"></div>`:''}
+    ${sub&&sub.status==='submitted'?`<div class="notice" style="margin-bottom:14px">Работа отправлена ${fdate(sub.at)} и ожидает проверки.${sub.file?' Файл: <b>'+esc(sub.file.name)+'</b>.':''}</div>`:''}
+    <form class="form" data-form="submit" data-n="${n}">
+      <label class="drop"><input type="file" id="file-${n}" data-a="file"><span id="fname">${sub&&sub.file?'Выбран файл: <b>'+esc(sub.file.name)+'</b> ('+fsize(sub.file.size)+'). Нажмите, чтобы заменить':'Нажмите, чтобы выбрать файл с отчётом или проектом'}</span></label>
+      <div class="field"><label for="link-${n}">Ссылка на репозиторий или облако (необязательно)</label><input type="url" id="link-${n}" placeholder="https://github.com/..." value="${esc(sub?sub.link:'')}"></div>
+      <div class="field"><label for="note-${n}">Комментарий преподавателю</label><textarea id="note-${n}">${esc(sub?sub.note:'')}</textarea></div>
+      <div class="err" id="serr"></div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button class="btn" type="submit">${sub?'Отправить на проверку повторно':'Отправить на проверку'}</button><span class="muted" style="font-size:13px">Для зачёта нужен тест от ${PASS}% и отправленная работа.</span></div></form></section>
+  </div>`;
+}
+function vLabTeacher(l){
+  return `<div class="wrap"><a href="#labs" class="muted" style="text-decoration:none">← Все лабораторные работы</a>
+  <div class="card"><div class="lab-head"><div class="num">${l.n}</div><div><span class="chip blue">Просмотр преподавателя</span><h1 style="margin-top:8px">Лабораторная работа № ${l.n}. ${esc(l.title)}</h1></div></div></div>
+  <section class="card"><h2>Цель работы</h2><p>${esc(l.goal)}</p></section>
+  <section class="card"><h2>Теоретические сведения</h2><div style="display:flex;flex-direction:column;gap:12px">${l.theory.map(t=>`<p>${fmt(t)}</p>`).join('')}</div></section>
+  <section class="card"><h2>Пошаговая инструкция</h2><ol class="list">${l.steps.map(t=>`<li>${fmt(t)}</li>`).join('')}</ol></section>
+  <section class="card"><div class="cols"><div><h2>Практические задания</h2><ol class="list">${l.tasks.map(t=>`<li>${fmt(t)}</li>`).join('')}</ol></div><div><h2>Дополнительные задания</h2><ol class="list">${l.adv.map(t=>`<li>${fmt(t)}</li>`).join('')}</ol></div></div>
+  <div style="margin-top:16px"><button class="btn alt sm" data-a="editTask" data-n="${l.n}">Редактировать задания</button></div></section></div>`;
+}
+
+function vAuth(){
+  const login=ui.authTab==='login';
+  return `<div class="auth"><div class="card" style="display:flex;flex-direction:column;gap:18px">
+    <div><h1 style="font-size:24px">${login?'Вход в IS Tools':'Регистрация'}</h1><p class="muted">${login?'Продолжите обучение с сохранённого места':'Создайте аккаунт студента, чтобы сохранять прогресс'}</p></div>
+    <div class="tabs"><button data-a="authTab" data-v="login" class="${login?'on':''}">Вход</button><button data-a="authTab" data-v="reg" class="${login?'':'on'}">Регистрация</button></div>
+    <form class="form" data-form="${login?'login':'reg'}">
+      ${login?'':`<div class="field"><label for="a-name">ФИО</label><input type="text" id="a-name" required autocomplete="name"></div>`}
+      <div class="field"><label for="a-email">Электронная почта</label><input type="email" id="a-email" required autocomplete="email"></div>
+      <div class="field"><label for="a-pass">Пароль</label><input type="password" id="a-pass" required minlength="6" autocomplete="${login?'current-password':'new-password'}"></div>
+      ${login?'':`<div class="field"><label for="a-code">Код преподавателя (только для преподавателей)</label><input type="text" id="a-code" placeholder="Оставьте пустым, если вы студент"></div>`}
+      <div class="err" id="aerr">${esc(ui.err)}</div>
+      <button class="btn" type="submit">${login?'Войти':'Создать аккаунт'}</button></form>
+    ${login?`<div class="notice">Демо: студент <b>aibek@demo.kg</b> / <b>demo123</b><br>Преподаватель <b>teacher@istools.kg</b> / <b>teacher123</b></div>`:`<div class="notice">Код преподавателя для демо: <b>TEACH-2026</b></div>`}
+  </div></div>`;
+}
+
+function vCabinet(){
+  const u=me();
+  if(u.role==='teacher')return `<div class="wrap"><div class="card"><h2>${esc(u.name)}</h2><p class="muted">Преподаватель · ${esc(u.email)}</p><p style="margin-top:14px"><a class="btn" href="#teacher">Открыть панель преподавателя</a></p></div></div>`;
+  const dc=doneCount(u.email),tot=total(u.email);
+  const rows=LABS.map(l=>{const p=P(u.email,l.n),s=stat(u.email,l.n);
+    return `<tr><td><b>${l.n}</b></td><td><a href="#lab-${l.n}" style="color:var(--accent);text-decoration:none">${esc(l.title)}</a></td><td>${chip(s)}</td><td class="n">${p.test==null?'—':p.test+'%'}</td><td class="n">${p.sub&&p.sub.status==='checked'?p.sub.grade:'—'}</td><td class="n"><b>${pts(u.email,l.n)}</b></td></tr>`}).join('');
+  return `<div class="wrap"><div class="head-row"><div><h1>Личный кабинет</h1><p class="muted">${esc(u.name)} · ${esc(u.email)}</p></div></div>
+  <div class="cols"><section class="card" style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">${ring(Math.round(dc/15*100),true)}
+    <div><h3>Прогресс курса</h3><p class="muted">Выполнено ${dc} из 15 работ</p><p style="margin-top:10px"><a class="btn sm" href="#lab-${nextLab(u.email)}">Продолжить обучение</a></p></div></section>
+    <section class="card"><h3>Баллы и оценка</h3><div style="display:flex;gap:28px;flex-wrap:wrap;margin-top:8px"><div class="stat" style="box-shadow:none"><b>${tot}</b><span>из 100 баллов</span></div><div class="stat" style="box-shadow:none"><b style="font-size:20px;line-height:46px">${gradeText(tot).split(' (')[0]}</b><span>текущая оценка</span></div></div>
+    <p class="muted" style="font-size:13px;margin-top:12px">Тест — до 40 баллов, проверка преподавателем — до 60 баллов за каждую работу. Средний балл считается по 15 работам.</p></section></div>
+  <section class="card"><h2>Мои лабораторные работы</h2><div class="tw"><table><thead><tr><th>№</th><th>Название</th><th>Статус</th><th class="n">Тест</th><th class="n">Оценка</th><th class="n">Баллы</th></tr></thead><tbody>${rows}</tbody></table></div></section></div>`;
+}
+
+function certOk(email){return doneCount(email)===15}
+function vCert(){
+  const u=me();
+  if(u.role==='teacher')return `<div class="wrap"><div class="card"><h2>Сертификат</h2><p class="muted">Сертификаты формируются для студентов после завершения курса.</p></div></div>`;
+  const dc=doneCount(u.email);
+  if(!certOk(u.email))return `<div class="wrap"><div class="card"><h2>Сертификат пока недоступен</h2><p class="muted" style="margin-bottom:14px">Чтобы получить сертификат, сдайте все 15 лабораторных работ и пройдите все тесты на ${PASS}% и выше. Сейчас выполнено ${dc} из 15.</p><div class="bar"><i style="width:${Math.round(dc/15*100)}%"></i></div><p style="margin-top:16px"><a class="btn" href="#lab-${nextLab(u.email)}">Продолжить обучение</a></p></div></div>`;
+  return `<div class="wrap"><div class="head-row"><div><h1>Сертификат</h1><p class="muted">Курс успешно завершён</p></div><button class="btn" data-a="dlcert" data-dl hidden>Скачать PNG</button></div><canvas id="certc" class="cert" width="1600" height="1130"></canvas></div>`;
+}
+function drawCertView(){
+  const c=$('#certc');if(!c)return;const u=me(),x=c.getContext('2d'),W=1600,H=1130,tot=total(u.email);
+  const ff='Manrope, Segoe UI, Arial, sans-serif';
+  x.fillStyle='#fff';x.fillRect(0,0,W,H);
+  x.fillStyle='#0f2f78';x.fillRect(0,0,W,22);x.fillRect(0,H-22,W,22);
+  x.strokeStyle='#1d5cff';x.lineWidth=4;x.strokeRect(60,60,W-120,H-120);
+  x.strokeStyle='#bcd0ff';x.lineWidth=2;x.strokeRect(78,78,W-156,H-156);
+  x.textAlign='center';
+  x.fillStyle='#1d5cff';x.font='800 28px '+ff;x.fillText('IS TOOLS · ОБРАЗОВАТЕЛЬНАЯ ЛАБОРАТОРИЯ',W/2,170);
+  x.fillStyle='#0f2f78';x.font='800 96px '+ff;x.fillText('СЕРТИФИКАТ',W/2,300);
+  x.fillStyle='#5a6b8f';x.font='500 30px '+ff;x.fillText('подтверждает, что',W/2,380);
+  x.fillStyle='#0e1b3d';let fs=72;x.font='800 '+fs+'px '+ff;while(x.measureText(u.name).width>W-300&&fs>34){fs-=4;x.font='800 '+fs+'px '+ff}
+  x.fillText(u.name,W/2,500);
+  x.strokeStyle='#1d5cff';x.lineWidth=3;x.beginPath();x.moveTo(W/2-360,530);x.lineTo(W/2+360,530);x.stroke();
+  x.fillStyle='#5a6b8f';x.font='500 30px '+ff;x.fillText('успешно завершил(а) курс по дисциплине',W/2,610);
+  x.fillStyle='#0f2f78';x.font='800 46px '+ff;x.fillText('«Инструментальные средства информационной системы»',W/2,690);
+  x.fillStyle='#5a6b8f';x.font='500 28px '+ff;x.fillText('15 лабораторных работ, 15 тестов, итоговый проект',W/2,750);
+  x.fillStyle='#e3ebff';x.beginPath();x.roundRect?x.roundRect(W/2-300,800,600,110,24):x.rect(W/2-300,800,600,110);x.fill();
+  x.fillStyle='#1d5cff';x.font='800 44px '+ff;x.fillText('Балл: '+tot+' из 100',W/2,850);
+  x.fillStyle='#0f2f78';x.font='600 30px '+ff;x.fillText('Оценка: '+gradeText(tot),W/2,893);
+  const last=Math.max(...Object.values(db.prog[u.email]||{}).map(p=>p.sub?p.sub.at:0),Date.now()-1);
+  x.fillStyle='#5a6b8f';x.font='500 24px '+ff;x.textAlign='left';x.fillText('Дата: '+fdate(Date.now()),140,1020);
+  x.textAlign='right';x.fillText('№ IS-'+hash(u.email+tot).toUpperCase().slice(0,8),W-140,1020);
+}
+
+/* ---------- Панель преподавателя ---------- */
+function vTeacher(){
+  const students=db.users.filter(u=>u.role==='student');
+  const pend=[];students.forEach(s=>{for(let n=1;n<=15;n++){const p=P(s.email,n);if(p.sub&&p.sub.status==='submitted')pend.push({s,n,p})}});
+  pend.sort((a,b)=>a.p.sub.at-b.p.sub.at);
+  const tabs=[['students','Студенты ('+students.length+')'],['review','Проверка работ ('+pend.length+')'],['tasks','Задания']];
+  let body='';
+  if(ui.tab==='students'){
+    body=`<section class="card"><div class="tw"><table><thead><tr><th>Студент</th><th>Прогресс по работам</th><th class="n">Сдано</th><th class="n">Балл</th><th>Оценка</th></tr></thead><tbody>${students.map(s=>{
+      const sq=LABS.map(l=>{const st=stat(s.email,l.n);return `<i class="s-${st}" title="Работа ${l.n}: ${STATUS[st][0]}">${l.n}</i>`}).join('');
+      return `<tr><td><b>${esc(s.name)}</b><br><span class="muted" style="font-size:12px">${esc(s.email)}</span></td><td><div class="sq">${sq}</div></td><td class="n">${doneCount(s.email)}/15</td><td class="n"><b>${total(s.email)}</b></td><td><span class="chip">${gradeText(total(s.email)).split(' (')[0]}</span></td></tr>`}).join('')||'<tr><td colspan="5" class="muted">Студентов пока нет.</td></tr>'}</tbody></table></div>
+      <p class="muted" style="font-size:13px;margin-top:12px">Зелёный — проверена, жёлтый — на проверке, синий — в процессе.</p></section>`;
+  }else if(ui.tab==='review'){
+    body=pend.length?`<div class="subs">${pend.map(({s,n,p})=>`<div class="sub"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><b>${esc(s.name)}</b><br><span class="muted">Работа ${n}. ${esc(LABS[n-1].title)}</span></div><span class="chip warn">Отправлена ${fdate(p.sub.at)}</span></div>
+      <div class="muted" style="font-size:14px">Файл: <b>${p.sub.file?esc(p.sub.file.name)+' ('+fsize(p.sub.file.size)+')':'не прикреплён'}</b>${p.sub.link?' · Ссылка: <a href="'+esc(p.sub.link)+'" target="_blank" rel="noopener" style="color:var(--accent)">'+esc(p.sub.link)+'</a>':''} · Тест: <b>${p.test==null?'—':p.test+'%'}</b></div>
+      ${p.sub.note?`<div class="notice">${esc(p.sub.note)}</div>`:''}
+      <form class="form" data-form="grade" data-e="${esc(s.email)}" data-n="${n}"><div class="two"><div class="field"><label for="g-${esc(s.email)}-${n}">Оценка (0–100)</label><input type="number" id="g-${esc(s.email)}-${n}" min="0" max="100" required></div>
+        <div class="field"><label for="f-${esc(s.email)}-${n}">Комментарий</label><textarea id="f-${esc(s.email)}-${n}" style="min-height:60px"></textarea></div></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn good sm" type="submit" data-act="accept">Принять работу</button><button class="btn bad sm" type="submit" data-act="return">Вернуть на доработку</button></div></form></div>`).join('')}</div>`
+      :`<section class="card"><h2>Все работы проверены</h2><p class="muted">Новых работ на проверку нет.</p></section>`;
+  }else{
+    const n=ui.editN||1,l=lab(n);
+    body=`<section class="card"><h2>Создание и редактирование заданий</h2><form class="form" data-form="task">
+      <div class="field"><label for="t-n">Лабораторная работа</label><select id="t-n" data-a="pickLab">${LABS.map(x=>`<option value="${x.n}" ${x.n===n?'selected':''}>${x.n}. ${esc(x.title)}</option>`).join('')}</select></div>
+      <div class="field"><label for="t-goal">Цель работы</label><textarea id="t-goal">${esc(l.goal)}</textarea></div>
+      <div class="field"><label for="t-tasks">Практические задания (по одному в строке)</label><textarea id="t-tasks" style="min-height:130px">${esc(l.tasks.join('\n'))}</textarea></div>
+      <div class="field"><label for="t-adv">Дополнительные задания (по одному в строке)</label><textarea id="t-adv">${esc(l.adv.join('\n'))}</textarea></div>
+      <div class="field"><label for="t-new">Новое практическое задание</label><input type="text" id="t-new" placeholder="Введите текст, чтобы добавить задание в конец списка"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" type="submit">Сохранить изменения</button><button class="btn line" type="button" data-a="resetTask" data-n="${n}">Вернуть исходные</button></div></form></section>`;
+  }
+  return `<div class="wrap"><div class="head-row"><div><h1>Панель преподавателя</h1><p class="muted">${esc(me().name)}</p></div></div>
+    <div class="tabs">${tabs.map(([k,t])=>`<button data-a="tab" data-v="${k}" class="${ui.tab===k?'on':''}">${t}</button>`).join('')}</div>${body}
+    <div class="notice">Данные хранятся в браузере этого устройства. Студенты и преподаватель, работающие на разных устройствах, друг друга не видят.</div></div>`;
+}
+
+/* ===================== События ===================== */
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2600)}
+function closeMenu(){$('#side').classList.remove('open');$('#scrim').classList.remove('on')}
+let dlNs=null;
+
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-a]');if(!t)return;
+  const a=t.dataset.a,u=me();
+  if(a==='menu'){$('#side').classList.toggle('open');$('#scrim').classList.toggle('on')}
+  else if(a==='closeMenu')closeMenu();
+  else if(a==='logout'){db.session=null;save();go('home')}
+  else if(a==='toLogin'){ui.err='';go('login')}
+  else if(a==='authTab'){ui.authTab=t.dataset.v;ui.err='';render()}
+  else if(a==='filter'){ui.filter=t.dataset.v;render(true)}
+  else if(a==='goto'){const el=document.getElementById('sec-'+t.dataset.v);if(el)el.scrollIntoView({behavior:'smooth',block:'start'})}
+  else if(a==='check'){
+    const n=routeInfo().n,l=lab(n),sel=l.test.map((q,i)=>{const r=document.querySelector(`input[name="q${n}_${i}"]:checked`);return r?+r.value:null});
+    if(sel.includes(null)){toast('Ответьте на все вопросы теста');return}
+    const ok=sel.filter((v,i)=>v===l.test[i][2]).length,score=Math.round(ok/l.test.length*100),p=P(u.email,n);
+    p.attempts=(p.attempts||0)+1;p.test=Math.max(p.test==null?0:p.test,score);save();ui.res[n]={sel,score};
+    toast(score>=PASS?'Тест пройден':'Тест не пройден, попробуйте снова');render(true)}
+  else if(a==='retry'){const n=routeInfo().n;delete ui.res[n];delete ui.ans[n];render(true)}
+  else if(a==='tab'){ui.tab=t.dataset.v;render()}
+  else if(a==='editTask'){ui.tab='tasks';ui.editN=+t.dataset.n;go('teacher')}
+  else if(a==='resetTask'){delete db.over[+t.dataset.n];save();toast('Исходные задания восстановлены');render(true)}
+  else if(a==='dlcert'){const c=$('#certc');if(c&&dlNs)c.toBlob(b=>{dlNs.save({filename:'IS-Tools-certificate.png',data:b}).then(()=>toast('Сертификат сохранён')).catch(er=>{if(er&&er.code!=='declined')toast('Не удалось сохранить файл')})},'image/png')}
+});
+document.addEventListener('change',e=>{
+  const t=e.target,a=t.dataset.a;if(!a)return;const u=me();
+  if(a==='step'){const n=routeInfo().n,p=P(u.email,n);const L0=LABS[n-1].steps.length;while(p.steps.length<L0)p.steps.push(false);p.steps[+t.dataset.i]=t.checked;save();render(true)}
+  else if(a==='ans'){const n=routeInfo().n;(ui.ans[n]=ui.ans[n]||[])[+t.dataset.i]=+t.value}
+  else if(a==='file'){const f=t.files&&t.files[0];ui.file=f?{name:f.name,size:f.size}:null;const s=$('#fname');if(s)s.innerHTML=f?'Выбран файл: <b>'+esc(f.name)+'</b> ('+fsize(f.size)+')':'Нажмите, чтобы выбрать файл'}
+  else if(a==='pickLab'){ui.editN=+t.value;render(true)}
+});
+document.addEventListener('submit',e=>{
+  const f=e.target.closest('form[data-form]');if(!f)return;e.preventDefault();
+  const k=f.dataset.form;
+  if(k==='login'){
+    const em=$('#a-email').value.trim().toLowerCase(),pw=$('#a-pass').value,u=db.users.find(x=>x.email===em);
+    if(!u||u.pass!==hash(pw)){ui.err='Неверная почта или пароль';$('#aerr').textContent=ui.err;return}
+    ui.err='';db.session=u.email;save();const nx=ui.next;ui.next=null;go(nx||'home');toast('Добро пожаловать, '+u.name.split(' ')[0])}
+  else if(k==='reg'){
+    const nm=$('#a-name').value.trim(),em=$('#a-email').value.trim().toLowerCase(),pw=$('#a-pass').value,code=$('#a-code').value.trim();
+    let err='';
+    if(nm.length<3)err='Введите ФИО полностью';else if(db.users.some(x=>x.email===em))err='Эта почта уже зарегистрирована';
+    else if(pw.length<6)err='Пароль должен быть не короче 6 символов';else if(code&&code!=='TEACH-2026')err='Неверный код преподавателя';
+    if(err){ui.err=err;$('#aerr').textContent=err;return}
+    db.users.push({email:em,name:nm,pass:hash(pw),role:code?'teacher':'student',at:Date.now()});db.session=em;save();ui.err='';ui.authTab='login';go('home');toast('Аккаунт создан')}
+  else if(k==='submit'){
+    const n=+f.dataset.n,u=me(),p=P(u.email,n),file=ui.file||(p.sub&&p.sub.file)||null,link=$('#link-'+n).value.trim(),note=$('#note-'+n).value.trim();
+    if(!file&&!link){$('#serr').textContent='Прикрепите файл или укажите ссылку на работу';return}
+    p.sub={file,link,note,at:Date.now(),status:'submitted'};ui.file=null;save();toast('Работа отправлена на проверку');render(true)}
+  else if(k==='grade'){
+    const em=f.dataset.e,n=+f.dataset.n,p=P(em,n),act=e.submitter&&e.submitter.dataset.act,g=+document.getElementById('g-'+em+'-'+n).value,fb=document.getElementById('f-'+em+'-'+n).value.trim();
+    if(act==='accept'){if(isNaN(g)||g<0||g>100){toast('Оценка должна быть от 0 до 100');return}p.sub.status='checked';p.sub.grade=g;p.sub.feedback=fb;toast('Работа принята')}
+    else{p.sub.status='returned';p.sub.feedback=fb||'Доработайте работу и отправьте повторно.';toast('Работа возвращена студенту')}
+    save();render(true)}
+  else if(k==='task'){
+    const n=+$('#t-n').value,lines=s=>s.split('\n').map(x=>x.trim()).filter(Boolean),tasks=lines($('#t-tasks').value),nw=$('#t-new').value.trim();
+    if(nw)tasks.push(nw);if(!tasks.length){toast('Добавьте хотя бы одно задание');return}
+    db.over[n]={goal:$('#t-goal').value.trim()||LABS[n-1].goal,tasks,adv:lines($('#t-adv').value)};save();toast('Задания сохранены');render(true)}
+});
+window.addEventListener('hashchange',()=>render());
+
+render();
+try{if(window.claude&&claude.use)claude.use('downloads').then(ns=>{if(ns){dlNs=ns;ui.dl=true;document.querySelectorAll('[data-dl]').forEach(b=>b.hidden=false)}}).catch(()=>{})}catch(e){}
+</script>
+
+</body></html>
